@@ -1,0 +1,10 @@
+Package: sunshine
+Type: Package
+Title: What the package does (short line)
+Version: 0.1
+Date: 2013-01-11
+Author: Colin Rundel <rundel@gmail.com>
+Maintainer: Colin Rundel <rundel@gmail.com>
+Description: Package for calculating various quantities regarding the sun's position e.g. solar angle, sunrise and sunset times, sunlight duration, etc. Calculations are based NOAA's solar calculator (http://www.esrl.noaa.gov/gmd/grad/solcalc/calcdetails.html).
+License: What license is it under?
+Depends: lubridate (>= 1.2.0), proj4 (>= 1.0-8), timezone
