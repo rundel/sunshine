@@ -29,7 +29,8 @@ solar = function(t, x, y, p4s="", tz="")
     stopifnot(is.character(p4s))
     stopifnot(is.character(tz))
 
-    stopifnot(all(lapply(list(t, x, y, p4s, tz), length) == 1))
+    #stopifnot(all(lapply(list(t, x, y, p4s, tz), length) == 1))
+    stopifnot(all(lapply(list(x, y, p4s, tz), length) == 1))
 
     if (tz == "")
         tz = find_tz(x,y,p4s=p4s)
@@ -90,7 +91,7 @@ solar = function(t, x, y, p4s="", tz="")
     solar_zenith = (180/pi) * acos(sin(lat_rad) * sin( (pi/180) * sun_declin ) + cos(lat_rad) * cos( (pi/180) * sun_declin ) * cos( (pi/180) * hour_angle ))
     solar_elev = 90 - solar_zenith
     
-    approx_atmo_refrac = refraction_correction(solar_elev)
+    approx_atmo_refrac = sapply(solar_elev, refraction_correction)
 
     solar_elev_corr = solar_elev + approx_atmo_refrac
 
@@ -98,14 +99,31 @@ solar = function(t, x, y, p4s="", tz="")
     tmp = (180/pi) * (acos( ( (sin(lat_rad) * cos(pi/180 * solar_zenith)) - sin(pi/180 * sun_declin) ) / ( cos(lat_rad) * sin(pi/180 * solar_zenith))))
     solar_azimuth = ifelse(hour_angle > 0, 180 + tmp, 540 - tmp) %% 360
 
+    ha_sunrise = (180/pi) * acos( cos(90.833 * pi/180) / (cos(lat_rad) * cos(sun_declin * pi/180))
+                                 -tan(lat_rad) * tan(sun_declin * pi/180)
+                                )
+
+    solar_noon = t
+    second(solar_noon) = 0
+    minute(solar_noon) = 0
+    hour(solar_noon) = 12
+
+    solar_noon = force_tz(solar_noon - seconds(round(60*(4*long+eq_of_time))), tz)
+
+    sunrise = solar_noon - seconds(round(60*4*ha_sunrise))
+    sunset  = solar_noon + seconds(round(60*4*ha_sunrise))
+
 
     return(
-        c(
+        data.frame(
             declin = sun_declin,
             zenith = solar_zenith,
             elev = solar_elev,
             elev_corr = solar_elev_corr,
-            azimuth = solar_azimuth
+            azimuth = solar_azimuth,
+            noon = solar_noon,
+            sunrise = sunrise,
+            sunset = sunset
         )
     )  
 }
